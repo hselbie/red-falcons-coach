@@ -56,7 +56,7 @@ const FORMATIONS = {
 const DEFAULT_FALCONS_STATE = {
   teamName: "The Red Falcons",
   formation: "2-2-1",
-  quarterMinutes: 10,
+  halfMinutes: 20,
   snackDuty: "Selbie Family",
   teamCaptain: "",
   players: [
@@ -69,7 +69,7 @@ const DEFAULT_FALCONS_STATE = {
     { id: "p7", name: "Omar", number: 9, preferredPos: "FWD", active: true, notes: "Aggressive on attack", status: "ready" },
     { id: "p8", name: "Noah", number: 11, preferredPos: "MID", active: true, notes: "Good footwork", status: "ready" },
     { id: "p9", name: "Thatcher", number: 5, preferredPos: "DEF", active: true, notes: "Team player, focused", status: "ready" },
-    { id: "p10", name: "Seamas", number: 6, preferredPos: "GK", active: true, notes: "Wants to try goalie Q2", status: "ready" },
+    { id: "p10", name: "Seamas", number: 6, preferredPos: "GK", active: true, notes: "Wants to try goalie", status: "ready" },
     { id: "p_mtm4qlwjffc", name: "Arius", number: 12, preferredPos: "MID", notes: "", status: "ready", active: true }
   ],
   startingLineup: {
@@ -80,18 +80,16 @@ const DEFAULT_FALCONS_STATE = {
     RM: "p5",
     ST: "p1"
   },
-  quarterLineups: {
+  halfLineups: {
     1: { GK: "p10", LB: "p3", RB: "p6", LM: "p2", RM: "p5", ST: "p1" },
-    2: { GK: "p10", LB: "p9", RB: "p7", LM: "p8", RM: "p_mtm4qlwjffc", ST: "p1" },
-    3: { GK: "p4", LB: "p6", RB: "p3", LM: "p2", RM: "p8", ST: "p5" },
-    4: { GK: "p4", LB: "p9", RB: "p7", LM: "p5", RM: "p_mtm4qlwjffc", ST: "p1" }
+    2: { GK: "p4", LB: "p9", RB: "p7", LM: "p8", RM: "p_mtm4qlwjffc", ST: "p1" }
   },
   match: {
     homeScore: 0,
     awayScore: 0,
     opponentName: "Wildcats",
-    currentQuarter: 1,
-    quarterSecondsElapsed: 0,
+    currentHalf: 1,
+    halfSecondsElapsed: 0,
     totalSecondsElapsed: 0,
     isRunning: false,
     goals: [],
@@ -1168,31 +1166,31 @@ function renderFairPlayTable() {
 }
 
 // -----------------------------------------------------------------------------
-// LIVE MATCH TIMER & RUNNING EQUAL TIME LEADERBOARD
+// LIVE MATCH TIMER & RUNNING EQUAL TIME LEADERBOARD (2 HALVES)
 // -----------------------------------------------------------------------------
 
 function toggleMatchTimer() {
   state.match.isRunning = !state.match.isRunning;
   const btn = document.getElementById('btnTimerToggle');
   const mBtn = document.getElementById('mobileTimerToggle');
-  const fieldBtn = document.getElementById('btnFieldTimerToggle');
+  const currentHalf = state.match.currentHalf || 1;
+  const halfName = currentHalf === 1 ? '1st Half' : '2nd Half';
 
   if (state.match.isRunning) {
     playSound('whistle');
-    const txt = '⏸ Pause Match Timer';
-    if (btn) { btn.textContent = '⏸ Pause Timer'; btn.className = 'btn btn-lg btn-danger'; }
-    if (fieldBtn) { fieldBtn.textContent = txt; fieldBtn.className = 'btn btn-lg btn-danger'; }
+    const txt = '⏸ Pause Timer';
+    if (btn) { btn.textContent = txt; btn.className = 'btn btn-lg btn-danger'; }
     if (mBtn) { mBtn.textContent = '⏸ Pause'; mBtn.className = 'btn btn-sm btn-danger'; }
     startLiveTimerInterval();
-    showToast(`⏱️ Quarter ${state.match.currentQuarter} match timer running!`);
+    showToast(`⏱️ ${halfName} match timer running!`);
   } else {
     playSound('tap');
-    const txt = '▶ Start Match Timer';
-    if (btn) { btn.textContent = '▶ Resume Timer'; btn.className = 'btn btn-lg btn-success'; }
-    if (fieldBtn) { fieldBtn.textContent = txt; fieldBtn.className = 'btn btn-lg btn-success'; }
+    const elapsed = state.match.halfSecondsElapsed || 0;
+    const txt = elapsed === 0 ? `▶ Start ${halfName}` : '▶ Resume Timer';
+    if (btn) { btn.textContent = txt; btn.className = 'btn btn-lg btn-success'; }
     if (mBtn) { mBtn.textContent = '▶ Start'; mBtn.className = 'btn btn-sm btn-success'; }
     stopLiveTimerInterval();
-    showToast(`⏸ Timer paused at ${formatTime(state.match.quarterSecondsElapsed)}`);
+    showToast(`⏸ Timer paused at ${formatTime(elapsed)}`);
   }
   updateTimerDisplay();
   saveTeamData();
@@ -1204,8 +1202,8 @@ function startLiveTimerInterval() {
   timerInterval = setInterval(() => {
     if (!state.match.isRunning) return;
 
-    state.match.quarterSecondsElapsed++;
-    state.match.totalSecondsElapsed++;
+    state.match.halfSecondsElapsed = (state.match.halfSecondsElapsed || 0) + 1;
+    state.match.totalSecondsElapsed = (state.match.totalSecondsElapsed || 0) + 1;
 
     // Increment playing time for all players currently on the pitch
     const currentFormation = FORMATIONS[state.formation] || FORMATIONS["2-2-1"];
@@ -1223,18 +1221,24 @@ function startLiveTimerInterval() {
     updateTimerDisplay();
     renderLiveMinutesTally();
 
-    const quarterMaxSecs = (state.quarterMinutes || 10) * 60;
-    if (state.match.quarterSecondsElapsed >= quarterMaxSecs) {
+    const halfMaxSecs = (state.halfMinutes || 20) * 60;
+    if (state.match.halfSecondsElapsed >= halfMaxSecs) {
       playSound('whistle');
       state.match.isRunning = false;
       stopLiveTimerInterval();
       const btn = document.getElementById('btnTimerToggle');
       const mBtn = document.getElementById('mobileTimerToggle');
-      const fieldBtn = document.getElementById('btnFieldTimerToggle');
-      if (btn) { btn.textContent = '▶ Start Next Quarter'; btn.className = 'btn btn-lg btn-success'; }
-      if (fieldBtn) { fieldBtn.textContent = '▶ Start Q' + (state.match.currentQuarter + 1); fieldBtn.className = 'btn btn-lg btn-success'; }
-      if (mBtn) { mBtn.textContent = '▶ Start Q' + (state.match.currentQuarter + 1); mBtn.className = 'btn btn-sm btn-success'; }
-      showToast(`🔔 QUARTER ${state.match.currentQuarter} COMPLETE! Time to make substitutions.`);
+      const currentHalf = state.match.currentHalf || 1;
+
+      if (currentHalf === 1) {
+        if (btn) { btn.textContent = '▶ Start 2nd Half'; btn.className = 'btn btn-lg btn-success'; }
+        if (mBtn) { mBtn.textContent = '▶ Start 2H'; mBtn.className = 'btn btn-sm btn-success'; }
+        showToast(`🔔 1ST HALF COMPLETE (Half-Time)! Great work. Time for break & 2nd half goalie check.`);
+      } else {
+        if (btn) { btn.textContent = '🏁 Full Time'; btn.className = 'btn btn-lg btn-subtle'; }
+        if (mBtn) { mBtn.textContent = '🏁 Final'; mBtn.className = 'btn btn-sm btn-subtle'; }
+        showToast(`🏁 FULL TIME! Final whistle! ⚽`);
+      }
     }
   }, 1000);
 }
@@ -1248,37 +1252,34 @@ function stopLiveTimerInterval() {
 
 function updateTimerDisplay() {
   const clock = document.getElementById('timerClockDisplay');
-  const fieldClock = document.getElementById('fieldClockDisplay');
   const progress = document.getElementById('timerProgressFill');
   const period = document.getElementById('currentPeriodDisplay');
-  const fieldPeriod = document.getElementById('fieldPeriodPill');
-  const fieldStatusText = document.getElementById('fieldTimerStatusText');
-  const liveQNum = document.getElementById('liveQuarterNumber');
-  const deployQNum = document.getElementById('deployQuarterNum');
+  const btn = document.getElementById('btnTimerToggle');
+  const nextBtn = document.getElementById('btnNextHalf') || document.getElementById('btnNextQuarter');
 
   const mPeriod = document.getElementById('mobilePeriodDisplay');
   const mTime = document.getElementById('mobileTimeDisplay');
   const mScore = document.getElementById('mobileScoreDisplay');
 
-  const elapsed = state.match.quarterSecondsElapsed;
+  const elapsed = state.match.halfSecondsElapsed || 0;
   const timeStr = formatTime(elapsed);
 
   if (clock) clock.textContent = timeStr;
-  if (fieldClock) fieldClock.textContent = timeStr;
   if (mTime) mTime.textContent = timeStr;
 
-  const quarterMaxSecs = (state.quarterMinutes || 10) * 60;
-  const pct = Math.min(100, (elapsed / quarterMaxSecs) * 100);
+  const halfMaxSecs = (state.halfMinutes || 20) * 60;
+  const pct = Math.min(100, (elapsed / halfMaxSecs) * 100);
   if (progress) progress.style.width = `${pct}%`;
 
-  const q = state.match.currentQuarter || 1;
-  const qStr = `QUARTER ${q} OF 4`;
-  if (period) period.textContent = qStr;
-  if (fieldPeriod) fieldPeriod.textContent = `QUARTER ${q}`;
-  if (mPeriod) mPeriod.textContent = `Q${q}`;
-  if (liveQNum) liveQNum.textContent = q;
-  if (deployQNum) deployQNum.textContent = q;
-  if (mScore) mScore.textContent = `${state.match.homeScore} - ${state.match.awayScore}`;
+  const h = state.match.currentHalf || 1;
+  const hStr = h === 1 ? '1ST HALF' : '2ND HALF';
+  if (period) period.textContent = hStr;
+  if (mPeriod) mPeriod.textContent = h === 1 ? '1H' : '2H';
+  if (mScore) mScore.textContent = `${state.match.homeScore || 0} - ${state.match.awayScore || 0}`;
+
+  if (nextBtn) {
+    nextBtn.textContent = h === 1 ? '2nd Half ⏩' : 'Full Time 🏁';
+  }
 
   const currentFormation = FORMATIONS[state.formation] || FORMATIONS["2-2-1"];
   const currentLineup = getActiveFieldLineup();
@@ -1289,55 +1290,36 @@ function updateTimerDisplay() {
     const formatted = formatTime(sec);
 
     const el = document.getElementById(`slotPlayerTimer_${slot.id}`);
-    if (el) el.textContent = formatted;
-
-    const wrapEl = document.getElementById(`tokenTimerWrap_${slot.id}`);
-    if (wrapEl) {
-      wrapEl.className = `token-live-timer ${state.match.isRunning && pid ? 'ticking' : 'paused'}`;
-    }
-  });
-
-  if (fieldStatusText) {
-    fieldStatusText.textContent = state.match.isRunning 
-      ? `🟢 Active • 6 On-Pitch Timers Counting Up` 
-      : `⏸️ Paused • 6 Timers Frozen`;
-  }
-
-  // Live second-by-second updates for bench displays
-  state.players.forEach(p => {
-    const sec = state.playerSecondsPlayed[p.id] || 0;
-    const formatted = formatTime(sec);
-    const bEl = document.getElementById(`benchPlayerTimer_${p.id}`);
-    if (bEl) bEl.textContent = `⏱️ ${formatted}`;
+    if (el) el.textContent = formatMinutesBrief(sec);
   });
 }
 
-function advanceToNextQuarter() {
+function advanceToNextHalf() {
   stopLiveTimerInterval();
   state.match.isRunning = false;
-  state.match.quarterSecondsElapsed = 0;
+  state.match.halfSecondsElapsed = 0;
 
-  if (state.match.currentQuarter < 4) {
-    state.match.currentQuarter++;
+  if ((state.match.currentHalf || 1) === 1) {
+    state.match.currentHalf = 2;
     playSound('whistle');
-    showToast(`⏩ Advanced to Quarter ${state.match.currentQuarter}`);
+    showToast(`⏩ Advanced to 2nd Half! Check your 2nd Half Goalie 🧤`);
   } else {
-    alert("Match is in the 4th Quarter. Final whistle!");
+    alert(`🏁 Full Time! Final score: Red Falcons ${state.match.homeScore || 0} - ${state.match.awayScore || 0} ${state.match.opponentName || 'Wildcats'}`);
   }
 
   const btn = document.getElementById('btnTimerToggle');
   const mBtn = document.getElementById('mobileTimerToggle');
   if (btn) {
-    btn.textContent = `▶ Start Quarter ${state.match.currentQuarter}`;
+    btn.textContent = state.match.currentHalf === 2 ? `▶ Start 2nd Half` : `🏁 Full Time`;
     btn.className = 'btn btn-lg btn-success';
   }
   if (mBtn) {
-    mBtn.textContent = `▶ Start Q${state.match.currentQuarter}`;
+    mBtn.textContent = state.match.currentHalf === 2 ? `▶ Start 2H` : `🏁 Final`;
     mBtn.className = 'btn btn-sm btn-success';
   }
 
   updateTimerDisplay();
-  renderLiveMatchTab();
+  renderFieldAndBench();
   saveTeamData();
 }
 
@@ -1348,8 +1330,8 @@ function resetMatch() {
     homeScore: 0,
     awayScore: 0,
     opponentName: state.match.opponentName || "Wildcats",
-    currentQuarter: 1,
-    quarterSecondsElapsed: 0,
+    currentHalf: 1,
+    halfSecondsElapsed: 0,
     totalSecondsElapsed: 0,
     isRunning: false,
     goals: [],
@@ -1358,6 +1340,21 @@ function resetMatch() {
   state.players.forEach(p => {
     state.playerSecondsPlayed[p.id] = 0;
   });
+  const btn = document.getElementById('btnTimerToggle');
+  const mBtn = document.getElementById('mobileTimerToggle');
+  if (btn) {
+    btn.textContent = '▶ Start 1st Half';
+    btn.className = 'btn btn-lg btn-success';
+  }
+  if (mBtn) {
+    mBtn.textContent = '▶ Start';
+    mBtn.className = 'btn btn-sm btn-success';
+  }
+  updateTimerDisplay();
+  renderAll();
+  saveTeamData();
+  showToast("↺ Match reset for 1st Half!");
+}
   const btn = document.getElementById('btnTimerToggle');
   const mBtn = document.getElementById('mobileTimerToggle');
   if (btn) {
@@ -1855,7 +1852,8 @@ function renderAll() {
   document.getElementById('displayTeamName').textContent = state.teamName || "The Red Falcons";
   document.getElementById('settingTeamName').value = state.teamName || "The Red Falcons";
   document.getElementById('settingSnackDuty').value = state.snackDuty || "Selbie Family";
-  document.getElementById('settingQuarterMins').value = state.quarterMinutes || 10;
+  const halfInput = document.getElementById('settingHalfMins') || document.getElementById('settingQuarterMins');
+  if (halfInput) halfInput.value = state.halfMinutes || 20;
   document.getElementById('formationSelect').value = state.formation || "2-2-1";
 
   renderFieldAndBench();
@@ -1918,14 +1916,11 @@ document.addEventListener('DOMContentLoaded', () => {
     autoBalanceQuarters();
   });
 
-  // Timer Controls (Both Field & Live Match Views)
+  // Timer Controls (2 Halves)
   document.getElementById('btnTimerToggle')?.addEventListener('click', toggleMatchTimer);
-  document.getElementById('btnNextQuarter')?.addEventListener('click', advanceToNextQuarter);
+  document.getElementById('btnNextHalf')?.addEventListener('click', advanceToNextHalf);
+  document.getElementById('btnNextQuarter')?.addEventListener('click', advanceToNextHalf);
   document.getElementById('btnTimerReset')?.addEventListener('click', resetMatch);
-
-  document.getElementById('btnFieldTimerToggle')?.addEventListener('click', toggleMatchTimer);
-  document.getElementById('btnFieldNextQuarter')?.addEventListener('click', advanceToNextQuarter);
-  document.getElementById('btnFieldTimerReset')?.addEventListener('click', resetMatch);
 
   document.getElementById('btnDeployQuarterLineup')?.addEventListener('click', () => {
     const currentQ = state.match.currentQuarter || 1;
@@ -2093,7 +2088,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnSaveTeamSettings')?.addEventListener('click', () => {
     state.teamName = document.getElementById('settingTeamName').value.trim() || state.teamName;
     state.snackDuty = document.getElementById('settingSnackDuty').value.trim() || state.snackDuty;
-    state.quarterMinutes = parseInt(document.getElementById('settingQuarterMins').value, 10) || 10;
+    const halfInput = document.getElementById('settingHalfMins') || document.getElementById('settingQuarterMins');
+    state.halfMinutes = parseInt(halfInput?.value, 10) || 20;
     saveTeamData();
     renderAll();
     showToast("💾 Team settings saved!");

@@ -23,8 +23,7 @@ const defaultData = {
   teamName: "The Red Falcons",
   teamColor: "#10b981",
   formation: "2-2-1", // 1 GK, 2 DEF, 2 MID, 1 FWD = 6 players
-  matchDurationMinutes: 40,
-  quartersCount: 4,
+  halfMinutes: 20,
   snackDuty: "Selbie Family",
   teamCaptain: "",
   players: [
@@ -59,8 +58,8 @@ const defaultData = {
     homeScore: 0,
     awayScore: 0,
     opponentName: "Wildcats",
-    currentQuarter: 1,
-    quarterSecondsElapsed: 0,
+    currentHalf: 1,
+    halfSecondsElapsed: 0,
     isRunning: false,
     goals: [],
     substitutions: []

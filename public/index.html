@@ -91,7 +91,7 @@
 
               <div class="vs-divider">
                 <span class="vs-text">VS</span>
-                <div class="match-period-badge" id="currentPeriodDisplay">QUARTER 1</div>
+                <div class="match-period-badge" id="currentPeriodDisplay">1ST HALF</div>
               </div>
 
               <div class="team-score-side away-side">
@@ -104,16 +104,16 @@
               </div>
             </div>
 
-            <!-- Big Match Timer -->
+            <!-- Match Timer -->
             <div class="timer-section">
               <div class="timer-clock" id="timerClockDisplay">00:00</div>
               <div class="timer-progress-bar">
                 <div class="timer-progress-fill" id="timerProgressFill"></div>
               </div>
               <div class="timer-controls">
-                <button class="btn btn-lg btn-success" id="btnTimerToggle">▶ Start Match Timer</button>
-                <button class="btn btn-lg btn-secondary" id="btnNextQuarter">Next Quarter ⏩</button>
-                <button class="btn btn-lg btn-outline" id="btnTimerReset">↺ Reset Match</button>
+                <button class="btn btn-lg btn-success" id="btnTimerToggle">▶ Start 1st Half</button>
+                <button class="btn btn-lg btn-secondary" id="btnNextHalf">2nd Half ⏩</button>
+                <button class="btn btn-lg btn-outline" id="btnTimerReset">↺ Reset</button>
               </div>
             </div>
           </div>
@@ -239,8 +239,8 @@
               <input type="text" id="settingSnackDuty" class="form-input" value="Selbie Family">
             </div>
             <div class="team-setting-item">
-              <label>Match Quarter Length (Mins):</label>
-              <input type="number" id="settingQuarterMins" class="form-input" value="10" min="5" max="25">
+              <label>Match Half Length (Mins):</label>
+              <input type="number" id="settingHalfMins" class="form-input" value="20" min="5" max="45">
             </div>
             <div class="team-setting-item">
               <button class="btn btn-secondary" id="btnSaveTeamSettings">Save Settings</button>
@@ -275,7 +275,7 @@
                       <li>No hands (except Goalie in the box).</li>
                       <li>Kick-ins or throw-ins depending on local league rules.</li>
                       <li>No slide tackles at this age.</li>
-                      <li>Substitutions happen at quarter breaks or when ball is out of bounds.</li>
+                      <li>Substitutions happen at half-time or on the fly when ball is out of bounds.</li>
                     </ul>
                   </li>
                 </ul>

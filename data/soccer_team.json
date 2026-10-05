@@ -3,7 +3,6 @@
   "teamColor": "#10b981",
   "formation": "2-2-1",
   "matchDurationMinutes": 40,
-  "quartersCount": 4,
   "snackDuty": "Selbie Family",
   "teamCaptain": "",
   "players": [
@@ -115,40 +114,6 @@
     "RM": "p1",
     "ST": "p5"
   },
-  "quarterLineups": {
-    "1": {
-      "GK": "p6",
-      "LB": "p9",
-      "RB": "p7",
-      "LM": "p10",
-      "RM": "p1",
-      "ST": "p5"
-    },
-    "2": {
-      "GK": "p10",
-      "LB": "p9",
-      "RB": "p12",
-      "LM": "p8",
-      "RM": "p7",
-      "ST": "p11"
-    },
-    "3": {
-      "GK": "p4",
-      "LB": "p6",
-      "RB": "p12",
-      "LM": "p2",
-      "RM": "p8",
-      "ST": "p1"
-    },
-    "4": {
-      "GK": "p10",
-      "LB": "p3",
-      "RB": "p9",
-      "LM": "p5",
-      "RM": "p7",
-      "ST": "p11"
-    }
-  },
   "matchState": {
     "homeScore": 0,
     "awayScore": 0,
@@ -159,13 +124,12 @@
     "goals": [],
     "substitutions": []
   },
-  "quarterMinutes": 10,
   "match": {
     "homeScore": 0,
     "awayScore": 0,
     "opponentName": "Wildcats",
-    "currentQuarter": 1,
-    "quarterSecondsElapsed": 0,
+    "currentHalf": 1,
+    "halfSecondsElapsed": 0,
     "totalSecondsElapsed": 0,
     "isRunning": false,
     "goals": [],
@@ -184,5 +148,6 @@
     "p10": 0,
     "p_mtm4qlwjffc": 0
   },
-  "pendingSwap": null
+  "pendingSwap": null,
+  "halfMinutes": 20
 }
