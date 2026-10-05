@@ -316,23 +316,14 @@ async function saveTeamData() {
 
 // Active Lineup helper
 function getActiveFieldLineup() {
-  const qSelect = document.getElementById('fieldQuarterSelect');
-  const val = qSelect ? qSelect.value : 'start';
-  if (val === 'start') {
-    return state.startingLineup;
-  }
-  return state.quarterLineups[val] || state.startingLineup;
+  return state.startingLineup || {};
 }
 
 function setActiveFieldLineup(newLineup) {
-  const qSelect = document.getElementById('fieldQuarterSelect');
-  const val = qSelect ? qSelect.value : 'start';
   state.startingLineup = { ...newLineup };
-  const currentQ = state.match.currentQuarter || 1;
-  state.quarterLineups[currentQ] = { ...newLineup };
-  if (val !== 'start') {
-    state.quarterLineups[val] = { ...newLineup };
-  }
+  const currentHalf = state.match.currentHalf || 1;
+  if (!state.halfLineups) state.halfLineups = { 1: {}, 2: {} };
+  state.halfLineups[currentHalf] = { ...newLineup };
   saveTeamData();
   renderFieldAndBench();
   updateTimerDisplay();
@@ -589,8 +580,7 @@ function renderFieldAndBench() {
 let currentSubOptionIndex = 0;
 
 function generateSubOptions() {
-  const currentQ = state.match.currentQuarter || 1;
-  const currentLineup = state.quarterLineups[currentQ] || state.startingLineup;
+  const currentLineup = getActiveFieldLineup();
   const onFieldIds = new Set(getPlayersOnPitch(currentLineup));
   const gkPlayerId = currentLineup['GK']; // Active Goalie
 
@@ -685,12 +675,12 @@ function renderFieldSmartSubBanner() {
   const currentOption = options[currentSubOptionIndex];
   const { outPlayer, inPlayer, label, outMins, inMins } = currentOption;
 
-  const currentQ = state.match.currentQuarter || 1;
-  const currentLineup = state.quarterLineups[currentQ] || state.startingLineup;
+  const currentHalf = state.match.currentHalf || 1;
+  const currentLineup = getActiveFieldLineup();
   const gkPlayerId = currentLineup['GK'];
   const gkPlayer = getPlayer(gkPlayerId);
   const gkName = gkPlayer ? gkPlayer.name : 'Goalkeeper';
-  const halfStr = currentQ <= 2 ? '1st Half' : '2nd Half';
+  const halfStr = currentHalf === 1 ? '1st Half' : '2nd Half';
 
   // Build quick alternate chips (up to 4 quick options)
   let altChipsHtml = '';
@@ -748,8 +738,7 @@ function renderFieldSmartSubBanner() {
 }
 
 window.quickSwapPlayers = function(outId, inId) {
-  const currentQ = state.match.currentQuarter || 1;
-  const currentLineup = state.quarterLineups[currentQ] || state.startingLineup;
+  const currentLineup = getActiveFieldLineup();
   let targetSlot = null;
   for (const [slotId, pid] of Object.entries(currentLineup)) {
     if (pid === outId) {
@@ -1355,21 +1344,7 @@ function resetMatch() {
   saveTeamData();
   showToast("↺ Match reset for 1st Half!");
 }
-  const btn = document.getElementById('btnTimerToggle');
-  const mBtn = document.getElementById('mobileTimerToggle');
-  if (btn) {
-    btn.textContent = '▶ Start Timer';
-    btn.className = 'btn btn-lg btn-success';
-  }
-  if (mBtn) {
-    mBtn.textContent = '▶ Start';
-    mBtn.className = 'btn btn-sm btn-success';
-  }
-  updateTimerDisplay();
-  renderAll();
-  saveTeamData();
-  showToast("↺ Match reset!");
-}
+
 
 // -----------------------------------------------------------------------------
 // LIVE MINUTES LEADERBOARD & EQUAL TIME SMART SUBS
@@ -1379,8 +1354,7 @@ function renderLiveMinutesTally() {
   const tallyCard = document.getElementById('liveMinutesTallyCard');
   if (!tallyCard) return;
 
-  const currentQ = state.match.currentQuarter || 1;
-  const currentLineup = state.quarterLineups[currentQ] || state.startingLineup;
+  const currentLineup = getActiveFieldLineup();
   const onFieldIds = new Set(getPlayersOnPitch(currentLineup));
   const gkPlayerId = currentLineup['GK'];
 
@@ -1638,13 +1612,13 @@ function handleGoal(team, change) {
     state.match.awayScore = Math.max(0, state.match.awayScore + change);
     if (change > 0) {
       state.match.events.unshift({
-        time: formatTime(state.match.quarterSecondsElapsed),
-        quarter: state.match.currentQuarter,
+        time: formatTime(state.match.halfSecondsElapsed || 0),
+        half: state.match.currentHalf || 1,
         text: `Opponent scored a goal (${state.match.homeScore} - ${state.match.awayScore})`
       });
     }
   }
-  renderLiveMatchTab();
+  renderFieldAndBench();
   saveTeamData();
 }
 
@@ -1654,8 +1628,7 @@ function openGoalScorerModal() {
   if (!modal || !grid) return;
 
   grid.innerHTML = '';
-  const currentQ = state.match.currentQuarter || 1;
-  const currentLineup = state.quarterLineups[currentQ] || state.startingLineup;
+  const currentLineup = getActiveFieldLineup();
   const onPitchIds = getPlayersOnPitch(currentLineup);
 
   getReadyPlayers().forEach(p => {
@@ -1667,8 +1640,8 @@ function openGoalScorerModal() {
 
     btn.addEventListener('click', () => {
       state.match.events.unshift({
-        time: formatTime(state.match.quarterSecondsElapsed),
-        quarter: state.match.currentQuarter,
+        time: formatTime(state.match.halfSecondsElapsed || 0),
+        half: state.match.currentHalf || 1,
         text: `⚽ GOAL by #${p.number} ${p.name}! (${state.match.homeScore} - ${state.match.awayScore})`
       });
       showToast(`🎉 Goal recorded for ${p.name}! Great shot!`);
@@ -1695,10 +1668,11 @@ function renderMatchEvents() {
   list.innerHTML = '';
   state.match.events.forEach(ev => {
     const row = document.createElement('div');
-    row.className = 'event-row';
+    row.className = 'match-event-item';
+    const halfLabel = (ev.half || 1) === 1 ? '1H' : '2H';
     row.innerHTML = `
-      <span>${ev.text}</span>
-      <span style="color: var(--text-muted); font-size: 0.75rem;">Q${ev.quarter} • ${ev.time}</span>
+      <span style="font-weight: 700;">${ev.text}</span>
+      <span style="color: var(--text-muted); font-size: 0.75rem; font-family: monospace;">${halfLabel} • ${ev.time}</span>
     `;
     list.appendChild(row);
   });
