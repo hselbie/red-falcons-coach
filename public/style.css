@@ -1543,3 +1543,235 @@ body {
   display: flex;
   gap: 0.5rem;
 }
+
+/* =============================================================================
+   MOBILE FIRST OPTIMIZATIONS (Smartphones & Tablets <= 768px)
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  /* Prevent horizontal scroll & improve touch responsiveness */
+  html, body {
+    overflow-x: hidden;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .app-container {
+    padding-bottom: 78px; /* Space for thumb-friendly bottom nav bar */
+  }
+
+  /* Compact Mobile Header */
+  .app-header {
+    padding: 0.6rem 0.85rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .team-title {
+    font-size: 1.15rem;
+  }
+
+  .team-subtitle {
+    font-size: 0.72rem;
+  }
+
+  /* Dock Navigation to Bottom Bar on Mobile for Easy Thumb Reach */
+  .nav-tabs {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: rgba(15, 23, 42, 0.97);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    padding: 6px 8px env(safe-area-inset-bottom, 6px);
+    margin: 0;
+    border-radius: 0;
+    display: flex;
+    justify-content: space-around;
+    gap: 6px;
+  }
+
+  .nav-tabs .tab-btn {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 0.75rem;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: 8px;
+    text-align: center;
+    min-height: 48px;
+    justify-content: center;
+    border: none;
+  }
+
+  .nav-tabs .tab-btn.active {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    font-weight: 800;
+  }
+
+  .nav-tabs .tab-btn .tab-icon {
+    font-size: 1.2rem;
+  }
+
+  .mobile-quick-bar {
+    display: none; /* Subsumed by unified top scoreboard */
+  }
+
+  /* Scoreboard & Timer */
+  .scoreboard-card {
+    padding: 0.85rem;
+  }
+
+  .score-display-row {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .team-label {
+    font-size: 1rem;
+  }
+
+  .score-number {
+    font-size: 2.6rem;
+  }
+
+  .opponent-input {
+    font-size: 1rem;
+    width: 100px;
+  }
+
+  .score-btns .btn {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.8rem;
+    min-height: 36px;
+  }
+
+  .timer-clock {
+    font-size: 2.8rem;
+  }
+
+  .timer-controls {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .timer-controls .btn {
+    flex: 1 1 30%;
+    padding: 0.65rem 0.5rem;
+    font-size: 0.85rem;
+    min-height: 44px;
+  }
+
+  /* Pitch View */
+  .pitch-container-card {
+    padding: 0.75rem;
+  }
+
+  .pitch-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .formation-selector-group {
+    justify-content: space-between;
+  }
+
+  .soccer-field {
+    min-height: 390px;
+    max-height: 460px;
+  }
+
+  .token-circle {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+
+  .token-name-tag {
+    font-size: 0.7rem;
+    padding: 1px 5px;
+    max-width: 85px;
+  }
+
+  .token-live-timer {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+  }
+
+  /* Smart Sub Banner on Mobile */
+  .smart-sub-banner {
+    padding: 0.75rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .smart-sub-banner > div:last-child {
+    display: flex;
+    width: 100%;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .smart-sub-banner > div:last-child .btn {
+    flex: 1;
+    min-height: 44px;
+  }
+
+  /* Bench Cards */
+  .bench-player-card {
+    padding: 0.65rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .bench-player-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .status-pill-toggle {
+    display: flex;
+    width: 100%;
+    gap: 4px;
+  }
+
+  .status-opt-btn {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 0.75rem;
+    text-align: center;
+    min-height: 38px;
+  }
+
+  /* Modals as Bottom Sheets on Mobile */
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-card {
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+    animation: slideUpMobile 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideUpMobile {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .swap-players-grid, .goal-scorers-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+}
