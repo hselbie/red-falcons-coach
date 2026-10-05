@@ -1,0 +1,188 @@
+{
+  "teamName": "The Red Falcons",
+  "teamColor": "#10b981",
+  "formation": "2-2-1",
+  "matchDurationMinutes": 40,
+  "quartersCount": 4,
+  "snackDuty": "Selbie Family",
+  "teamCaptain": "",
+  "players": [
+    {
+      "id": "p1",
+      "name": "Fynn",
+      "number": 7,
+      "preferredPos": "ALL",
+      "active": true,
+      "notes": "Fast dribbler, high energy",
+      "status": "ready"
+    },
+    {
+      "id": "p2",
+      "name": "Elliot",
+      "number": 10,
+      "preferredPos": "MID",
+      "active": true,
+      "notes": "Great playmaker, good passes",
+      "status": "ready"
+    },
+    {
+      "id": "p3",
+      "name": "Alex",
+      "number": 4,
+      "preferredPos": "DEF",
+      "active": true,
+      "notes": "Solid defender, good clearing",
+      "status": "ready"
+    },
+    {
+      "id": "p4",
+      "name": "Dominic",
+      "number": 1,
+      "preferredPos": "GK",
+      "active": true,
+      "notes": "Loves playing goalie",
+      "status": "ready"
+    },
+    {
+      "id": "p5",
+      "name": "Indigo",
+      "number": 8,
+      "preferredPos": "MID",
+      "active": true,
+      "notes": "Strong runner, covers ground",
+      "status": "ready"
+    },
+    {
+      "id": "p6",
+      "name": "Reese",
+      "number": 3,
+      "preferredPos": "DEF",
+      "active": true,
+      "notes": "Stays back, protects goal",
+      "status": "ready"
+    },
+    {
+      "id": "p7",
+      "name": "Omar",
+      "number": 9,
+      "preferredPos": "FWD",
+      "active": true,
+      "notes": "Aggressive on attack",
+      "status": "ready"
+    },
+    {
+      "id": "p8",
+      "name": "Noah",
+      "number": 11,
+      "preferredPos": "MID",
+      "active": true,
+      "notes": "Good footwork",
+      "status": "ready"
+    },
+    {
+      "id": "p9",
+      "name": "Thatcher",
+      "number": 5,
+      "preferredPos": "DEF",
+      "active": true,
+      "notes": "Team player, focused",
+      "status": "ready"
+    },
+    {
+      "id": "p10",
+      "name": "Seamas",
+      "number": 6,
+      "preferredPos": "GK",
+      "active": true,
+      "notes": "Wants to try goalie Q2",
+      "status": "ready"
+    },
+    {
+      "id": "p_mtm4qlwjffc",
+      "name": "Arius",
+      "number": 12,
+      "preferredPos": "MID",
+      "notes": "",
+      "status": "ready",
+      "active": true
+    }
+  ],
+  "startingLineup": {
+    "GK": "p6",
+    "LB": "p9",
+    "RB": "p7",
+    "LM": "p10",
+    "RM": "p1",
+    "ST": "p5"
+  },
+  "quarterLineups": {
+    "1": {
+      "GK": "p6",
+      "LB": "p9",
+      "RB": "p7",
+      "LM": "p10",
+      "RM": "p1",
+      "ST": "p5"
+    },
+    "2": {
+      "GK": "p10",
+      "LB": "p9",
+      "RB": "p12",
+      "LM": "p8",
+      "RM": "p7",
+      "ST": "p11"
+    },
+    "3": {
+      "GK": "p4",
+      "LB": "p6",
+      "RB": "p12",
+      "LM": "p2",
+      "RM": "p8",
+      "ST": "p1"
+    },
+    "4": {
+      "GK": "p10",
+      "LB": "p3",
+      "RB": "p9",
+      "LM": "p5",
+      "RM": "p7",
+      "ST": "p11"
+    }
+  },
+  "matchState": {
+    "homeScore": 0,
+    "awayScore": 0,
+    "opponentName": "Wildcats",
+    "currentQuarter": 1,
+    "quarterSecondsElapsed": 0,
+    "isRunning": false,
+    "goals": [],
+    "substitutions": []
+  },
+  "quarterMinutes": 10,
+  "match": {
+    "homeScore": 0,
+    "awayScore": 0,
+    "opponentName": "Wildcats",
+    "currentQuarter": 1,
+    "quarterSecondsElapsed": 0,
+    "totalSecondsElapsed": 0,
+    "isRunning": false,
+    "goals": [],
+    "events": []
+  },
+  "playerSecondsPlayed": {
+    "p1": 0,
+    "p2": 0,
+    "p3": 0,
+    "p4": 0,
+    "p5": 0,
+    "p6": 0,
+    "p7": 0,
+    "p8": 0,
+    "p9": 0,
+    "p10": 0,
+    "p_mtm4qlwjffc": 0
+  },
+  "pendingSwap": null
+}

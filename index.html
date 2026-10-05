@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Youth Soccer Coach - Equal Playing Time & Match Planner (6v6)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+    
+    <!-- Top Navigation / Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="team-badge" id="teamBadgeIcon">⚽</div>
+        <div>
+          <h1 class="team-title" id="displayTeamName">The Red Falcons</h1>
+          <div class="team-subtitle">
+            <span class="age-tag">U8 Soccer (6v6)</span>
+            <span class="roster-count-badge" id="rosterCountBadge">10 Players</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="fieldTab">
+          <span class="tab-icon">🏟️</span>
+          <span>Match & Field</span>
+        </button>
+        <button class="tab-btn" data-tab="rosterTab">
+          <span class="tab-icon">👥</span>
+          <span>Squad</span>
+        </button>
+        <button class="tab-btn" data-tab="toolsTab">
+          <span class="tab-icon">📋</span>
+          <span>Game Day</span>
+        </button>
+      </nav>
+
+      <div class="header-right">
+        <button class="btn btn-outline btn-sm" id="btnLogout" title="Log Out" style="display: none;">
+          <span>🔒</span> Log Out
+        </button>
+        <button class="btn btn-outline btn-sm" id="btnShareLineup" title="Copy Lineup to Clipboard">
+          <span>📤</span> Share
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Quick Status Bar (Sticky on Mobile) -->
+    <div class="mobile-quick-bar">
+      <div class="quick-timer-box">
+        <span class="m-period" id="mobilePeriodDisplay">Q1</span>
+        <span class="m-time" id="mobileTimeDisplay">00:00</span>
+      </div>
+      <div class="quick-score-box">
+        <span id="mobileScoreDisplay">0 - 0</span>
+      </div>
+      <div class="quick-action-box">
+        <button class="btn btn-sm btn-success" id="mobileTimerToggle">▶ Start</button>
+        <button class="btn btn-sm btn-primary" id="mobileQuickSubBtn">⚡ Sub</button>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- TAB 1: LIVE MATCH, FIELD LINEUP & REAL-TIME SUBS -->
+      <section id="fieldTab" class="tab-pane active">
+        
+        <!-- Live Scoreboard & Timer Box -->
+        <div class="scoreboard-card" style="margin-bottom: 1rem;">
+          <!-- Teams & Score -->
+          <div class="score-display-row">
+            <div class="team-score-side home-side">
+              <span class="team-label" id="scoreHomeName">Red Falcons</span>
+              <span class="score-number" id="homeScoreDisplay">0</span>
+              <div class="score-btns">
+                <button class="btn btn-sm btn-success" id="btnGoalHome">+ Goal ⚽</button>
+                <button class="btn btn-sm btn-subtle" id="btnGoalHomeMinus">-</button>
+              </div>
+            </div>
+
+            <div class="vs-divider">
+              <span class="vs-text">VS</span>
+              <div class="match-period-badge" id="currentPeriodDisplay">QUARTER 1</div>
+            </div>
+
+            <div class="team-score-side away-side">
+              <input type="text" class="opponent-input" id="opponentNameInput" value="Wildcats" placeholder="Opponent">
+              <span class="score-number" id="awayScoreDisplay">0</span>
+              <div class="score-btns">
+                <button class="btn btn-sm btn-danger" id="btnGoalAway">+ Opp Goal</button>
+                <button class="btn btn-sm btn-subtle" id="btnGoalAwayMinus">-</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Big Match Timer -->
+          <div class="timer-section">
+            <div class="timer-clock" id="timerClockDisplay">00:00</div>
+            <div class="timer-progress-bar">
+              <div class="timer-progress-fill" id="timerProgressFill"></div>
+            </div>
+            <div class="timer-controls">
+              <button class="btn btn-lg btn-success" id="btnTimerToggle">▶ Start Match Timer</button>
+              <button class="btn btn-lg btn-secondary" id="btnNextQuarter">Next Quarter ⏩</button>
+              <button class="btn btn-lg btn-outline" id="btnTimerReset">↺ Reset Match</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Sub Recommendation Alert Banner -->
+        <div id="fieldSmartSubBanner" class="smart-sub-banner-field"></div>
+
+        <div class="field-tab-grid">
+          
+          <!-- Left Column: Soccer Pitch -->
+          <div class="pitch-container-card">
+            <div class="pitch-header">
+              <div class="formation-selector-group">
+                <label for="formationSelect"><strong>Formation:</strong></label>
+                <select id="formationSelect" class="form-select">
+                  <option value="2-2-1">2-2-1 (1 GK, 2 DEF, 2 MID, 1 ST) - Balanced</option>
+                  <option value="1-3-1">1-3-1 (1 GK, 1 DEF, 3 MID, 1 ST) - Midfield</option>
+                  <option value="2-1-2">2-1-2 (1 GK, 2 DEF, 1 MID, 2 ST) - Attack</option>
+                  <option value="1-2-1-1">1-2-1-1 (1 GK, 1 DEF, 2 MID, 1 CAM, 1 ST) - Diamond</option>
+                </select>
+              </div>
+
+              <div class="active-quarter-pill">
+                <span>View: </span>
+                <select id="fieldQuarterSelect" class="form-select-sm">
+                  <option value="start">Starting 6 Lineup</option>
+                  <option value="1">Quarter 1</option>
+                  <option value="2">Quarter 2</option>
+                  <option value="3">Quarter 3</option>
+                  <option value="4">Quarter 4</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Authentic SVG Soccer Pitch -->
+            <div class="soccer-field" id="soccerField">
+              <!-- Field Markings -->
+              <div class="field-grass-lines"></div>
+              <div class="field-outer-border"></div>
+              <div class="field-center-circle"></div>
+              <div class="field-center-line"></div>
+              <div class="field-center-spot"></div>
+              <div class="field-penalty-box top-box"></div>
+              <div class="field-goal-box top-goal"></div>
+              <div class="field-penalty-box bottom-box"></div>
+              <div class="field-goal-box bottom-goal"></div>
+
+              <!-- Interactive Player Slots -->
+              <div id="fieldPositionsContainer" class="field-positions-overlay"></div>
+            </div>
+
+            <div class="field-footer-hints">
+              <span class="hint-pill">💡 Tap any player on pitch to swap or change status</span>
+              <span class="hint-pill">🟢 Green = 6 Active on Pitch</span>
+            </div>
+          </div>
+
+          <!-- Right Column: Bench, Leaderboard & Highlights -->
+          <div class="bench-column" style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <!-- Bench & Substitutes -->
+            <div class="bench-sidebar-card">
+              <div class="bench-header">
+                <div>
+                  <h3>🪑 Bench (<span id="benchCount">4</span>)</h3>
+                  <p class="bench-subtext">Tap any bench player to sub into field in 1 click.</p>
+                </div>
+                <button class="btn btn-sm btn-primary" id="btnBenchAddPlayer">➕ Add Player</button>
+              </div>
+
+              <div id="benchPlayersList" class="bench-players-grid">
+                <!-- Bench player cards rendered by JS -->
+              </div>
+
+              <!-- Quick Squad Summary -->
+              <div class="squad-quick-stats">
+                <div class="stat-box">
+                  <span class="stat-num" id="statActiveField">6</span>
+                  <span class="stat-label">On Field</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-num" id="statBenchCount">4</span>
+                  <span class="stat-label">Ready Bench</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-num" id="statRestingCount" style="color: #f59e0b;">0</span>
+                  <span class="stat-label">Resting/Out</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Playing Time Leaderboard & Smart Subs -->
+            <div class="live-minutes-tally-card" id="liveMinutesTallyCard">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+
+            <!-- Goal & Event Log -->
+            <div class="match-log-card">
+              <h3>🎉 Match Highlights & Goal Log</h3>
+              <div class="match-events-list" id="matchEventsList">
+                <div class="empty-event-msg">No goals or events recorded yet. Cheer on the kids! 📣</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: SQUAD ROSTER MANAGEMENT -->
+      <section id="rosterTab" class="tab-pane">
+        <div class="roster-container">
+          
+          <div class="section-banner">
+            <div>
+              <h2>👥 Squad Roster & Availability</h2>
+              <p>Quickly mark kids as <strong>Ready to Play</strong>, <strong>Resting / Doesn't want to play right now</strong>, or <strong>Out / Absent</strong>.</p>
+            </div>
+            <div class="banner-actions">
+              <button class="btn btn-primary" id="btnOpenAddPlayerModal">
+                <span>➕</span> Add Player
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Inline Add Player Strip -->
+          <div class="quick-add-player-card">
+            <form id="quickAddPlayerForm" class="quick-add-form">
+              <div class="quick-add-input-group">
+                <span class="quick-add-icon">⚽</span>
+                <input type="text" id="quickPlayerName" class="form-input quick-input-name" placeholder="Quick add player name (e.g. Leo)" required>
+              </div>
+              <input type="number" id="quickPlayerNumber" class="form-input quick-input-num" placeholder="#" min="1" max="99" style="width: 70px;">
+              <select id="quickPlayerPos" class="form-select quick-input-pos">
+                <option value="FWD">Forward</option>
+                <option value="MID" selected>Midfield</option>
+                <option value="DEF">Defense</option>
+                <option value="GK">Goalie</option>
+                <option value="ALL">Any Pos</option>
+              </select>
+              <button type="submit" class="btn btn-primary quick-add-btn">
+                <span>➕</span> Add to Team
+              </button>
+            </form>
+          </div>
+
+          <!-- Team Settings Strip -->
+          <div class="team-settings-card">
+            <div class="team-setting-item">
+              <label>Team Name:</label>
+              <input type="text" id="settingTeamName" class="form-input" value="The Red Falcons">
+            </div>
+            <div class="team-setting-item">
+              <label>Snack Duty Family:</label>
+              <input type="text" id="settingSnackDuty" class="form-input" value="Selbie Family">
+            </div>
+            <div class="team-setting-item">
+              <label>Match Quarter Length (Mins):</label>
+              <input type="number" id="settingQuarterMins" class="form-input" value="10" min="5" max="25">
+            </div>
+            <div class="team-setting-item">
+              <button class="btn btn-secondary" id="btnSaveTeamSettings">Save Settings</button>
+            </div>
+          </div>
+
+          <!-- Player Cards Grid -->
+          <div class="squad-cards-grid" id="squadCardsGrid"></div>
+
+        </div>
+      </section>
+
+      <!-- TAB 5: GAME DAY TOOLS & COACH CHEAT-SHEET -->
+      <section id="toolsTab" class="tab-pane">
+        <div class="tools-container">
+          
+          <div class="tools-grid">
+            
+            <!-- Card 1: 7-Year-Old (U8) Coaching Rules & Tips -->
+            <div class="tool-card">
+              <div class="tool-card-header">
+                <h3>👶 7-Year-Old (U8) Soccer Coaching Philosophy</h3>
+              </div>
+              <div class="tool-card-body">
+                <ul class="coaching-tips-list">
+                  <li><strong>1. Equal Playing Time for All:</strong> Every child who wants to play gets equal time. If a child wants a break, pause them without pressure.</li>
+                  <li><strong>2. "Spread Out!" (Avoid the Beehive):</strong> 7-year-olds swarm the ball. Remind wingers to stay wide and defenders to protect the goal.</li>
+                  <li><strong>3. Try Every Position:</strong> Rotate kids between Goalie, Defense, Midfield, and Striker over the season.</li>
+                  <li><strong>4. Positive Reinforcement Only:</strong> Celebrate great passes, hustle, sportsmanship, and trying hard.</li>
+                  <li><strong>5. Quick Whistle Rules:</strong>
+                    <ul>
+                      <li>No hands (except Goalie in the box).</li>
+                      <li>Kick-ins or throw-ins depending on local league rules.</li>
+                      <li>No slide tackles at this age.</li>
+                      <li>Substitutions happen at quarter breaks or when ball is out of bounds.</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Card 2: Game Day Checklist -->
+            <div class="tool-card">
+              <div class="tool-card-header">
+                <h3>📋 Game Day Checklist</h3>
+              </div>
+              <div class="tool-card-body checklist-body">
+                <label class="check-item"><input type="checkbox" checked> Size 3 Soccer Balls (Inflated)</label>
+                <label class="check-item"><input type="checkbox" checked> Cones for Warm-Up Drills</label>
+                <label class="check-item"><input type="checkbox" checked> Team Pinnies / Scrimmage Vests</label>
+                <label class="check-item"><input type="checkbox" checked> Goalie Gloves & Goalie Jersey</label>
+                <label class="check-item"><input type="checkbox" checked> First Aid Kit & Ice Packs</label>
+                <label class="check-item"><input type="checkbox"> Water Bottles for all kids</label>
+                <label class="check-item"><input type="checkbox"> Half-Time Fruit / Snacks (<span id="snackDutyDisplay">Selbie Family</span>)</label>
+                <label class="check-item"><input type="checkbox"> Team Captain Band (<span id="captainDisplay">Assigned per game</span>)</label>
+              </div>
+            </div>
+
+            <!-- Card 3: Lineup Formatter / Exporter -->
+            <div class="tool-card">
+              <div class="tool-card-header">
+                <h3>📱 Export & Parent WhatsApp / SMS Message</h3>
+              </div>
+              <div class="tool-card-body">
+                <textarea id="exportLineupText" class="export-textarea" rows="8" readonly></textarea>
+                <div class="export-btn-bar">
+                  <button class="btn btn-primary" id="btnCopyExport">📋 Copy Message to Clipboard</button>
+                  <button class="btn btn-secondary" id="btnRefreshExport">🔄 Refresh Summary</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MODAL: ADD / EDIT PLAYER -->
+    <div id="playerModal" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modalTitle">Add Player to Squad</h3>
+          <button class="modal-close-btn" id="btnClosePlayerModal">&times;</button>
+        </div>
+        <form id="playerForm">
+          <input type="hidden" id="formPlayerId" value="">
+          <div class="form-group">
+            <label for="formPlayerName">Player Name *</label>
+            <input type="text" id="formPlayerName" class="form-input" required placeholder="e.g., Fynn">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formPlayerNumber">Jersey Number</label>
+              <input type="number" id="formPlayerNumber" class="form-input" min="1" max="99" value="7">
+            </div>
+            <div class="form-group">
+              <label for="formPlayerPos">Preferred Position</label>
+              <select id="formPlayerPos" class="form-select">
+                <option value="FWD">Forward / Striker</option>
+                <option value="MID">Midfielder</option>
+                <option value="DEF">Defender</option>
+                <option value="GK">Goalie (GK)</option>
+                <option value="ALL">Any Position</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="formPlayerNotes">Coach's Notes</label>
+            <input type="text" id="formPlayerNotes" class="form-input" placeholder="e.g. Fast runner, loves goalie">
+          </div>
+          <div class="form-group">
+            <label>Playing Status</label>
+            <div class="status-radio-group">
+              <label class="status-radio-btn ready">
+                <input type="radio" name="formPlayerStatus" value="ready" checked>
+                <span>🟢 Ready to Play</span>
+              </label>
+              <label class="status-radio-btn rest">
+                <input type="radio" name="formPlayerStatus" value="rest">
+                <span>⏸️ Taking a Break / Rest</span>
+              </label>
+              <label class="status-radio-btn out">
+                <input type="radio" name="formPlayerStatus" value="out">
+                <span>❌ Out / Absent</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" id="btnCancelPlayerModal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Player</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: SWAP PLAYER SELECTION -->
+    <div id="swapModal" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="swapModalTitle">Swap Position</h3>
+          <button class="modal-close-btn" id="btnCloseSwapModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="swapModalSubtitle">Select a player to put in this position:</p>
+          <div class="swap-players-grid" id="swapPlayersGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: RECORD GOAL SCORER -->
+    <div id="goalModal" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>⚽ Goal Scored! Who Scored?</h3>
+          <button class="modal-close-btn" id="btnCloseGoalModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="goal-scorers-grid" id="goalScorersGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: COACH AUTHENTICATION -->
+    <div id="loginModal" class="modal-backdrop">
+      <div class="modal-card" style="max-width: 380px; text-align: center; padding: 2rem 1.5rem;">
+        <div style="font-size: 3.2rem; line-height: 1; margin-bottom: 0.75rem;">🦅⚽</div>
+        <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 900; margin-bottom: 0.25rem;">The Red Falcons</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Coach Match & Roster Access</p>
+        
+        <form id="loginForm" style="display: flex; flex-direction: column; gap: 1rem; text-align: left;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="loginUsername"><strong>Username</strong></label>
+            <input type="text" id="loginUsername" class="form-input" placeholder="coach" required autofocus>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="loginPassword"><strong>Password</strong></label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••••••" required>
+          </div>
+          <div id="loginError" style="color: #ef4444; font-size: 0.85rem; display: none; font-weight: 600; text-align: center;"></div>
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; justify-content: center; margin-top: 0.5rem; font-weight: 800;">
+            <span>⚽</span> Log In as Coach
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification Overlay -->
+    <div id="toastNotification" class="toast"></div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
