@@ -426,70 +426,73 @@ window.togglePlayerRest = function(playerId) {
 // FIELD & BENCH RENDERING
 // -----------------------------------------------------------------------------
 
-function renderSoccerField() {
-  const container = document.getElementById('fieldPositionsContainer');
+function renderOnFieldPlayers() {
+  const container = document.getElementById('onFieldPlayersList');
   if (!container) return;
   container.innerHTML = '';
 
   const formationConfig = FORMATIONS[state.formation] || FORMATIONS["2-2-1"];
   const currentLineup = getActiveFieldLineup();
+  const currentQ = state.match.currentQuarter || 1;
+  const isRunning = state.match.isRunning;
 
   formationConfig.slots.forEach(slot => {
     const assignedPlayerId = currentLineup[slot.id];
     const player = getPlayer(assignedPlayerId);
     const pStatus = player ? getPlayerStatus(player) : 'none';
-
-    const token = document.createElement('div');
-    token.className = `player-token pos-${slot.posGroup}`;
-    token.style.top = slot.top;
-    token.style.left = slot.left;
-
     const seconds = player ? (state.playerSecondsPlayed[player.id] || 0) : 0;
+    const isGK = slot.id === 'GK';
 
-    const circle = document.createElement('div');
-    circle.className = 'token-circle';
-    if (pStatus === 'rest') {
-      circle.style.borderColor = '#f59e0b';
-    } else if (pStatus === 'out') {
-      circle.style.borderColor = '#ef4444';
-    }
-    circle.textContent = player ? (player.number || '★') : '+';
+    const card = document.createElement('div');
+    card.className = `on-field-row ${isGK ? 'is-gk-row' : ''}`;
 
-    const posBadge = document.createElement('span');
-    posBadge.className = 'token-pos-badge';
-    posBadge.textContent = slot.id === 'GK' ? '🧤 GK' : slot.short;
-    circle.appendChild(posBadge);
-
-    const nameTag = document.createElement('div');
-    nameTag.className = 'token-name-tag';
-    nameTag.textContent = player ? player.name : `[${slot.short}]`;
-    if (slot.id === 'GK' && player) {
-      nameTag.innerHTML = `🧤 ${player.name} <small style="display:block; font-size: 0.65rem; color: #a5b4fc;">(1 Half Goalie)</small>`;
+    let posBadgeColor = '#3b82f6';
+    let posTitle = slot.label;
+    if (isGK) {
+      posBadgeColor = '#f59e0b';
+      posTitle = currentQ <= 2 ? 'Goalie (1st Half)' : 'Goalie (2nd Half)';
+    } else if (slot.posGroup === 'FWD') {
+      posBadgeColor = '#ef4444';
+    } else if (slot.posGroup === 'MID') {
+      posBadgeColor = '#10b981';
     }
 
-    token.appendChild(circle);
-    token.appendChild(nameTag);
+    card.innerHTML = `
+      <div class="on-field-left" style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
+        <div class="pos-pill" style="background: ${posBadgeColor}; color: #000; font-weight: 900; font-size: 0.72rem; padding: 3px 6px; border-radius: 6px; flex-shrink: 0;">
+          ${isGK ? '🧤 GK' : slot.short}
+        </div>
+        <div class="player-num-circle" style="width: 34px; height: 34px; font-size: 0.95rem; font-weight: 900; border-radius: 50%; background: #0f172a; border: 2px solid ${posBadgeColor}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          ${player ? (player.number || '★') : '+'}
+        </div>
+        <div class="player-text-block" style="min-width: 0; flex: 1;">
+          <div class="player-name" style="font-weight: 800; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${player ? player.name : `<span style="color:#94a3b8; font-style:italic;">[Unassigned ${slot.short}]</span>`}
+          </div>
+          <div class="player-sub-pos" style="font-size: 0.72rem; color: #94a3b8;">
+            ${posTitle}
+          </div>
+        </div>
+      </div>
 
-    if (player) {
-      const isRunning = state.match.isRunning;
-      const timerDiv = document.createElement('div');
-      timerDiv.id = `tokenTimerWrap_${slot.id}`;
-      timerDiv.className = `token-live-timer ${isRunning ? 'ticking' : 'paused'}`;
-      timerDiv.innerHTML = `
-        <span class="timer-dot"></span>
-        <span id="slotPlayerTimer_${slot.id}">${formatTime(seconds)}</span>
-      `;
-      token.appendChild(timerDiv);
-    }
+      <div class="on-field-right" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+        <div class="live-minutes-badge ${isRunning ? 'ticking' : ''}">
+          <span id="slotPlayerTimer_${slot.id}" style="font-family: 'Outfit', monospace; font-weight: 800; font-size: 1rem; color: #34d399;">
+            ${formatMinutesBrief(seconds)}
+          </span>
+        </div>
+        <button class="btn btn-sm btn-sub-action" onclick="openSwapModal('${slot.id}', '${slot.label}', '${assignedPlayerId || ''}')" style="font-weight: 700; padding: 0.35rem 0.6rem;">
+          <span>🔄</span> Sub Out
+        </button>
+      </div>
+    `;
 
-    // Click on token -> open swap modal
-    token.addEventListener('click', () => {
-      playSound('tap');
-      openSwapModal(slot.id, slot.label, assignedPlayerId);
-    });
-
-    container.appendChild(token);
+    container.appendChild(card);
   });
+}
+
+function renderSoccerField() {
+  renderOnFieldPlayers();
 }
 
 function renderBench() {
@@ -512,6 +515,9 @@ function renderBench() {
   const readyBench = readyPlayers.filter(p => !onPitchIds.has(p.id));
   const otherBench = [...restingPlayers, ...outPlayers].filter(p => !onPitchIds.has(p.id));
 
+  // Sort ready bench by least minutes played (freshest first)
+  readyBench.sort((a, b) => (state.playerSecondsPlayed[a.id] || 0) - (state.playerSecondsPlayed[b.id] || 0));
+
   const allBench = [...readyBench, ...otherBench];
 
   if (benchCountSpan) benchCountSpan.textContent = readyBench.length;
@@ -520,61 +526,44 @@ function renderBench() {
   if (statRestingCount) statRestingCount.textContent = restingPlayers.length + outPlayers.length;
 
   if (allBench.length === 0) {
-    benchList.innerHTML = `<div style="grid-column: 1/-1; color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem;">All ready squad members are on the pitch!</div>`;
+    benchList.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem;">All ready squad members are on the pitch!</div>`;
     return;
   }
 
   allBench.forEach(player => {
     const pStatus = getPlayerStatus(player);
-    const card = document.createElement('div');
-    card.className = `bench-player-card status-${pStatus}`;
-
     const seconds = state.playerSecondsPlayed[player.id] || 0;
 
-    let quickActionBtn = '';
-    if (pStatus === 'rest') {
-      quickActionBtn = `<button class="btn btn-sm btn-success" style="width:100%; margin-top:6px; font-size:0.75rem;" onclick="event.stopPropagation(); setPlayerStatus('${player.id}', 'ready')">🟢 Resume Playing</button>`;
-    } else if (pStatus === 'ready') {
-      quickActionBtn = `<button class="btn btn-sm btn-subtle" style="width:100%; margin-top:6px; font-size:0.75rem;" onclick="event.stopPropagation(); setPlayerStatus('${player.id}', 'rest')">⏸️ Put on Break</button>`;
-    } else {
-      quickActionBtn = `<button class="btn btn-sm btn-outline" style="width:100%; margin-top:6px; font-size:0.75rem;" onclick="event.stopPropagation(); setPlayerStatus('${player.id}', 'ready')">🟢 Mark Ready</button>`;
-    }
+    const card = document.createElement('div');
+    card.className = `bench-player-row status-${pStatus}`;
 
     card.innerHTML = `
-      <div class="bench-card-top">
-        <div class="bench-number">${player.number || '•'}</div>
-        <div style="text-align: left;">
-          <div class="bench-name">${player.name}</div>
-          <span class="bench-pos-badge">${player.preferredPos || 'SUB'}</span>
+      <div class="bench-player-left" style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
+        <div class="player-num-circle bench-circle" style="width: 32px; height: 32px; font-size: 0.9rem; font-weight: 900; border-radius: 50%; background: #0f172a; border: 2px solid #64748b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          ${player.number || '★'}
+        </div>
+        <div class="player-text-block" style="min-width: 0; flex: 1;">
+          <div class="player-name" style="font-weight: 800; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${player.name}
+          </div>
+          <div class="player-sub-pos" style="font-size: 0.72rem; color: #94a3b8;">
+            Played: <strong style="color: #34d399;">${formatMinutesBrief(seconds)}</strong> • ${player.preferredPos || 'SUB'}
+          </div>
         </div>
       </div>
-      <span style="font-size: 0.7rem; color: #34d399; font-weight: 700;">⏱️ ${formatMinutesBrief(seconds)}</span>
 
-      <!-- 1-Tap Status Selector Pill (Toggles when tapped) -->
-      <div class="status-pill-toggle" onclick="event.stopPropagation()">
-        <button class="status-opt-btn opt-ready ${pStatus === 'ready' ? 'active' : ''}" onclick="setPlayerStatus('${player.id}', 'ready')" title="Click to toggle Play / Rest">🟢 Play</button>
-        <button class="status-opt-btn opt-rest ${pStatus === 'rest' ? 'active' : ''}" onclick="setPlayerStatus('${player.id}', 'rest')" title="Click to toggle Rest ON / OFF">⏸️ Rest</button>
-        <button class="status-opt-btn opt-out ${pStatus === 'out' ? 'active' : ''}" onclick="setPlayerStatus('${player.id}', 'out')" title="Click to toggle Out ON / OFF">❌ Out</button>
+      <div class="bench-actions-group" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+        <div class="status-pill-toggle" onclick="event.stopPropagation()">
+          <button class="status-opt-btn opt-ready ${pStatus === 'ready' ? 'active' : ''}" onclick="setPlayerStatus('${player.id}', 'ready')" title="Ready to Play">🟢</button>
+          <button class="status-opt-btn opt-rest ${pStatus === 'rest' ? 'active' : ''}" onclick="setPlayerStatus('${player.id}', 'rest')" title="Resting">⏸️</button>
+          <button class="status-opt-btn opt-out ${pStatus === 'out' ? 'active' : ''}" onclick="setPlayerStatus('${player.id}', 'out')" title="Out">❌</button>
+        </div>
+
+        <button class="btn btn-sm btn-primary" onclick="openPlaceBenchPlayerModal('${player.id}', '${player.name}')" style="font-weight: 700; padding: 0.35rem 0.65rem;">
+          <span>⚡</span> Sub IN
+        </button>
       </div>
-
-      ${quickActionBtn}
     `;
-
-    card.addEventListener('click', () => {
-      playSound('tap');
-      if (pStatus === 'rest') {
-        // Clicking a resting card turns rest OFF and opens place modal
-        setPlayerStatus(player.id, 'ready');
-        openPlaceBenchPlayerModal(player.id, player.name);
-      } else if (pStatus === 'out') {
-        if (confirm(`${player.name} is marked Out. Mark Ready and sub in?`)) {
-          setPlayerStatus(player.id, 'ready');
-          openPlaceBenchPlayerModal(player.id, player.name);
-        }
-      } else {
-        openPlaceBenchPlayerModal(player.id, player.name);
-      }
-    });
 
     benchList.appendChild(card);
   });

@@ -72,151 +72,120 @@
     <!-- Main Content Area -->
     <main class="main-content">
       
-      <!-- TAB 1: LIVE MATCH, FIELD LINEUP & REAL-TIME SUBS -->
+      <!-- TAB 1: LIVE MATCH, WHO IS IN VS WHO IS OUT (CORE SIDELINE VIEW) -->
       <section id="fieldTab" class="tab-pane active">
+        <div class="sideline-view-container">
         
-        <!-- Live Scoreboard & Timer Box -->
-        <div class="scoreboard-card" style="margin-bottom: 1rem;">
-          <!-- Teams & Score -->
-          <div class="score-display-row">
-            <div class="team-score-side home-side">
-              <span class="team-label" id="scoreHomeName">Red Falcons</span>
-              <span class="score-number" id="homeScoreDisplay">0</span>
-              <div class="score-btns">
-                <button class="btn btn-sm btn-success" id="btnGoalHome">+ Goal ⚽</button>
-                <button class="btn btn-sm btn-subtle" id="btnGoalHomeMinus">-</button>
+          <!-- Live Scoreboard & Timer Box -->
+          <div class="scoreboard-card">
+            <!-- Teams & Score -->
+            <div class="score-display-row">
+              <div class="team-score-side home-side">
+                <span class="team-label" id="scoreHomeName">Red Falcons</span>
+                <span class="score-number" id="homeScoreDisplay">0</span>
+                <div class="score-btns">
+                  <button class="btn btn-sm btn-success" id="btnGoalHome">+ Goal ⚽</button>
+                  <button class="btn btn-sm btn-subtle" id="btnGoalHomeMinus">-</button>
+                </div>
+              </div>
+
+              <div class="vs-divider">
+                <span class="vs-text">VS</span>
+                <div class="match-period-badge" id="currentPeriodDisplay">QUARTER 1</div>
+              </div>
+
+              <div class="team-score-side away-side">
+                <input type="text" class="opponent-input" id="opponentNameInput" value="Wildcats" placeholder="Opponent">
+                <span class="score-number" id="awayScoreDisplay">0</span>
+                <div class="score-btns">
+                  <button class="btn btn-sm btn-danger" id="btnGoalAway">+ Opp Goal</button>
+                  <button class="btn btn-sm btn-subtle" id="btnGoalAwayMinus">-</button>
+                </div>
               </div>
             </div>
 
-            <div class="vs-divider">
-              <span class="vs-text">VS</span>
-              <div class="match-period-badge" id="currentPeriodDisplay">QUARTER 1</div>
-            </div>
-
-            <div class="team-score-side away-side">
-              <input type="text" class="opponent-input" id="opponentNameInput" value="Wildcats" placeholder="Opponent">
-              <span class="score-number" id="awayScoreDisplay">0</span>
-              <div class="score-btns">
-                <button class="btn btn-sm btn-danger" id="btnGoalAway">+ Opp Goal</button>
-                <button class="btn btn-sm btn-subtle" id="btnGoalAwayMinus">-</button>
+            <!-- Big Match Timer -->
+            <div class="timer-section">
+              <div class="timer-clock" id="timerClockDisplay">00:00</div>
+              <div class="timer-progress-bar">
+                <div class="timer-progress-fill" id="timerProgressFill"></div>
+              </div>
+              <div class="timer-controls">
+                <button class="btn btn-lg btn-success" id="btnTimerToggle">▶ Start Match Timer</button>
+                <button class="btn btn-lg btn-secondary" id="btnNextQuarter">Next Quarter ⏩</button>
+                <button class="btn btn-lg btn-outline" id="btnTimerReset">↺ Reset Match</button>
               </div>
             </div>
           </div>
 
-          <!-- Big Match Timer -->
-          <div class="timer-section">
-            <div class="timer-clock" id="timerClockDisplay">00:00</div>
-            <div class="timer-progress-bar">
-              <div class="timer-progress-fill" id="timerProgressFill"></div>
-            </div>
-            <div class="timer-controls">
-              <button class="btn btn-lg btn-success" id="btnTimerToggle">▶ Start Match Timer</button>
-              <button class="btn btn-lg btn-secondary" id="btnNextQuarter">Next Quarter ⏩</button>
-              <button class="btn btn-lg btn-outline" id="btnTimerReset">↺ Reset Match</button>
-            </div>
-          </div>
-        </div>
+          <!-- Live Sub Recommendation Alert Banner -->
+          <div id="fieldSmartSubBanner" class="smart-sub-banner-field"></div>
 
-        <!-- Live Sub Recommendation Alert Banner -->
-        <div id="fieldSmartSubBanner" class="smart-sub-banner-field"></div>
-
-        <div class="field-tab-grid">
-          
-          <!-- Left Column: Soccer Pitch -->
-          <div class="pitch-container-card">
-            <div class="pitch-header">
-              <div class="formation-selector-group">
-                <label for="formationSelect"><strong>Formation:</strong></label>
-                <select id="formationSelect" class="form-select">
-                  <option value="2-2-1">2-2-1 (1 GK, 2 DEF, 2 MID, 1 ST) - Balanced</option>
-                  <option value="1-3-1">1-3-1 (1 GK, 1 DEF, 3 MID, 1 ST) - Midfield</option>
-                  <option value="2-1-2">2-1-2 (1 GK, 2 DEF, 1 MID, 2 ST) - Attack</option>
-                  <option value="1-2-1-1">1-2-1-1 (1 GK, 1 DEF, 2 MID, 1 CAM, 1 ST) - Diamond</option>
-                </select>
+          <!-- 🟢 ON FIELD (IN) - 6 ACTIVE PLAYERS -->
+          <div class="on-field-card">
+            <div class="card-header-row">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="status-indicator-dot online"></span>
+                <h3 style="font-size: 1.15rem; font-weight: 900; color: #34d399;">🟢 ON FIELD (IN) — 6 Players</h3>
               </div>
-
-              <div class="active-quarter-pill">
-                <span>View: </span>
-                <select id="fieldQuarterSelect" class="form-select-sm">
-                  <option value="start">Starting 6 Lineup</option>
-                  <option value="1">Quarter 1</option>
-                  <option value="2">Quarter 2</option>
-                  <option value="3">Quarter 3</option>
-                  <option value="4">Quarter 4</option>
+              <div class="formation-selector-inline" style="display: flex; align-items: center; gap: 6px;">
+                <label for="formationSelect" style="font-size: 0.8rem; color: var(--text-muted);"><strong>Formation:</strong></label>
+                <select id="formationSelect" class="form-select-sm">
+                  <option value="2-2-1">2-2-1 (Balanced)</option>
+                  <option value="1-3-1">1-3-1 (Midfield)</option>
+                  <option value="2-1-2">2-1-2 (Attack)</option>
+                  <option value="1-2-1-1">1-2-1-1 (Diamond)</option>
                 </select>
               </div>
             </div>
 
-            <!-- Authentic SVG Soccer Pitch -->
-            <div class="soccer-field" id="soccerField">
-              <!-- Field Markings -->
-              <div class="field-grass-lines"></div>
-              <div class="field-outer-border"></div>
-              <div class="field-center-circle"></div>
-              <div class="field-center-line"></div>
-              <div class="field-center-spot"></div>
-              <div class="field-penalty-box top-box"></div>
-              <div class="field-goal-box top-goal"></div>
-              <div class="field-penalty-box bottom-box"></div>
-              <div class="field-goal-box bottom-goal"></div>
-
-              <!-- Interactive Player Slots -->
-              <div id="fieldPositionsContainer" class="field-positions-overlay"></div>
-            </div>
-
-            <div class="field-footer-hints">
-              <span class="hint-pill">💡 Tap any player on pitch to swap or change status</span>
-              <span class="hint-pill">🟢 Green = 6 Active on Pitch</span>
+            <div id="onFieldPlayersList" class="on-field-list">
+              <!-- Rendered dynamically by app.js: 6 rich player rows -->
             </div>
           </div>
 
-          <!-- Right Column: Bench, Leaderboard & Highlights -->
-          <div class="bench-column" style="display: flex; flex-direction: column; gap: 1rem;">
-            
-            <!-- Bench & Substitutes -->
-            <div class="bench-sidebar-card">
-              <div class="bench-header">
-                <div>
-                  <h3>🪑 Bench (<span id="benchCount">4</span>)</h3>
-                  <p class="bench-subtext">Tap any bench player to sub into field in 1 click.</p>
-                </div>
-                <button class="btn btn-sm btn-primary" id="btnBenchAddPlayer">➕ Add Player</button>
+          <!-- 🪑 BENCH (OUT) - WAITING SUBSTITUTES -->
+          <div class="bench-sidebar-card">
+            <div class="bench-header">
+              <div>
+                <h3 style="font-size: 1.15rem; font-weight: 900;">🪑 BENCH (OUT) — <span id="benchCount">4</span> Substitutes</h3>
+                <p class="bench-subtext">Sorted by freshest / lowest playing time. Tap <strong>Sub IN</strong> to swap into the match.</p>
               </div>
-
-              <div id="benchPlayersList" class="bench-players-grid">
-                <!-- Bench player cards rendered by JS -->
-              </div>
-
-              <!-- Quick Squad Summary -->
-              <div class="squad-quick-stats">
-                <div class="stat-box">
-                  <span class="stat-num" id="statActiveField">6</span>
-                  <span class="stat-label">On Field</span>
-                </div>
-                <div class="stat-box">
-                  <span class="stat-num" id="statBenchCount">4</span>
-                  <span class="stat-label">Ready Bench</span>
-                </div>
-                <div class="stat-box">
-                  <span class="stat-num" id="statRestingCount" style="color: #f59e0b;">0</span>
-                  <span class="stat-label">Resting/Out</span>
-                </div>
-              </div>
+              <button class="btn btn-sm btn-primary" id="btnBenchAddPlayer">➕ Add Player</button>
             </div>
 
-            <!-- Live Playing Time Leaderboard & Smart Subs -->
-            <div class="live-minutes-tally-card" id="liveMinutesTallyCard">
-              <!-- Rendered dynamically by app.js -->
+            <div id="benchPlayersList" class="bench-players-grid">
+              <!-- Bench player cards rendered by JS -->
             </div>
 
-            <!-- Goal & Event Log -->
-            <div class="match-log-card">
-              <h3>🎉 Match Highlights & Goal Log</h3>
-              <div class="match-events-list" id="matchEventsList">
-                <div class="empty-event-msg">No goals or events recorded yet. Cheer on the kids! 📣</div>
+            <!-- Quick Squad Summary -->
+            <div class="squad-quick-stats" style="margin-top: 0.75rem;">
+              <div class="stat-box">
+                <span class="stat-num" id="statActiveField">6</span>
+                <span class="stat-label">On Field</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-num" id="statBenchCount">4</span>
+                <span class="stat-label">Ready Bench</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-num" id="statRestingCount" style="color: #f59e0b;">0</span>
+                <span class="stat-label">Resting/Out</span>
               </div>
             </div>
+          </div>
 
+          <!-- Live Playing Time Leaderboard & Minute Bars -->
+          <div class="live-minutes-tally-card" id="liveMinutesTallyCard">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+
+          <!-- Goal & Event Log -->
+          <div class="match-log-card">
+            <h3>🎉 Match Highlights & Goal Log</h3>
+            <div class="match-events-list" id="matchEventsList">
+              <div class="empty-event-msg">No goals or events recorded yet. Cheer on the kids! 📣</div>
+            </div>
           </div>
 
         </div>
