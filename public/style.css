@@ -604,17 +604,10 @@ html, body {
 }
 
 /* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.15s ease;
+button, .btn, .tab-btn, .on-field-row, .bench-player-row, .status-opt-btn, .sub-chip-btn, .swap-player-card, .check-item {
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -654,10 +647,12 @@ html, body {
   justify-content: center;
   z-index: 1000;
   padding: 0;
+  pointer-events: none;
 }
 
 .modal-backdrop.active {
   display: flex;
+  pointer-events: auto;
 }
 
 .modal-card {
@@ -758,6 +753,7 @@ html, body {
   border-radius: 9999px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   opacity: 0;
+  pointer-events: none;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 2000;
   white-space: nowrap;
@@ -766,6 +762,7 @@ html, body {
 .toast.show {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
+  pointer-events: auto;
 }
 
 .status-indicator-dot {

@@ -107,52 +107,62 @@ let state = JSON.parse(JSON.stringify(DEFAULT_FALCONS_STATE));
 // Live Timer interval ref
 let timerInterval = null;
 
-// Sound Effects via Web Audio API
-const audioCtx = (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext))
-  ? new (window.AudioContext || window.webkitAudioContext)()
-  : null;
+// Lazy Web Audio API for Mobile Safari / WebKit
+let audioCtx = null;
+function getAudioContext() {
+  if (!audioCtx && typeof window !== 'undefined') {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      try {
+        audioCtx = new AudioContextClass();
+      } catch (e) {}
+    }
+  }
+  return audioCtx;
+}
 
 function playSound(type) {
-  if (!audioCtx) return;
   try {
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
     }
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(ctx.destination);
 
     if (type === 'whistle') {
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(2600, audioCtx.currentTime);
-      osc.frequency.setValueAtTime(3000, audioCtx.currentTime + 0.08);
-      osc.frequency.setValueAtTime(2600, audioCtx.currentTime + 0.16);
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+      osc.frequency.setValueAtTime(2600, ctx.currentTime);
+      osc.frequency.setValueAtTime(3000, ctx.currentTime + 0.08);
+      osc.frequency.setValueAtTime(2600, ctx.currentTime + 0.16);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.35);
+      osc.stop(ctx.currentTime + 0.35);
     } else if (type === 'goal') {
       const freqs = [523.25, 659.25, 783.99, 1046.50];
       freqs.forEach((f, idx) => {
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
         o.connect(g);
-        g.connect(audioCtx.destination);
+        g.connect(ctx.destination);
         o.type = 'triangle';
         o.frequency.value = f;
-        g.gain.setValueAtTime(0.2, audioCtx.currentTime + (idx * 0.08));
-        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
-        o.start(audioCtx.currentTime + (idx * 0.08));
-        o.stop(audioCtx.currentTime + 0.7);
+        g.gain.setValueAtTime(0.2, ctx.currentTime + (idx * 0.08));
+        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+        o.start(ctx.currentTime + (idx * 0.08));
+        o.stop(ctx.currentTime + 0.7);
       });
     } else if (type === 'tap') {
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.05);
+      osc.stop(ctx.currentTime + 0.05);
     }
   } catch (e) {}
 }
