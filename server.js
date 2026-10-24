@@ -7,11 +7,22 @@ const PORT = process.env.PORT || 7777;
 const HOST = process.env.HOST || '0.0.0.0';
 const DATA_FILE = path.join(__dirname, 'data', 'soccer_team.json');
 
-// Auth Credentials
-const AUTH_USER = 'coach';
-const AUTH_PASS = 'redfalconsarethebest';
-// Fixed session secret / token hash for persistent login across server restarts
-const VALID_TOKEN = crypto.createHash('sha256').update(`${AUTH_USER}:${AUTH_PASS}:redfalcons_coach_v1`).digest('hex');
+// Auth Credentials (from environment, see /etc/soccer-coach.env)
+const AUTH_USER = process.env.AUTH_USER || 'coach';
+const AUTH_PASS = process.env.AUTH_PASS;
+const SESSION_SECRET = process.env.SESSION_SECRET;
+if (!AUTH_PASS || !SESSION_SECRET) {
+  console.error('AUTH_PASS and SESSION_SECRET must be set');
+  process.exit(1);
+}
+// Token persists across restarts; rotate SESSION_SECRET to log everyone out
+const VALID_TOKEN = crypto.createHmac('sha256', SESSION_SECRET).update(`${AUTH_USER}:${AUTH_PASS}`).digest('hex');
+
+function safeEqual(a, b) {
+  const bufA = Buffer.from(String(a));
+  const bufB = Buffer.from(String(b));
+  return bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB);
+}
 
 // Ensure data directory exists
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
@@ -121,12 +132,12 @@ function isAuthenticated(req) {
   const authHeader = req.headers['authorization'];
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7).trim();
-    if (token === VALID_TOKEN) return true;
+    if (safeEqual(token, VALID_TOKEN)) return true;
   }
 
   // Check Cookie
   const cookies = parseCookies(req);
-  if (cookies['falcon_coach_token'] === VALID_TOKEN) {
+  if (cookies['falcon_coach_token'] && safeEqual(cookies['falcon_coach_token'], VALID_TOKEN)) {
     return true;
   }
 
@@ -155,7 +166,7 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const { username, password } = JSON.parse(body);
-        if (username === AUTH_USER && password === AUTH_PASS) {
+        if (safeEqual(username, AUTH_USER) && safeEqual(password, AUTH_PASS)) {
           res.setHeader('Set-Cookie', `falcon_coach_token=${VALID_TOKEN}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ success: true, token: VALID_TOKEN, user: AUTH_USER }));
